@@ -6,10 +6,16 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bunyan": "^1.4.0",
     "coffee-script": "^1.9.3",
+    "iconv-lite": "^0.4.11",
     "lodash": "^3.10.0",
-    "nano": "^6.1.4",
     "q": "^1.4.1",
+    "request": "^2.58.0",
+    "sqlite3": "^3.0.8",
+    "touch": "0.0.3",
+    "tough-cookie": "^2.0.0",
+    "tough-cookie-filestore": "0.0.1",
     "wbt": "pryzm0/wbt"
   }
 }
