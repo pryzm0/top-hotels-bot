@@ -1,0 +1,6 @@
+{
+	"email": "",
+	"password": "",
+	"template": "message.hbs",
+	"subject": ""
+}

@@ -4,8 +4,8 @@ HOTELS = ['al44182']
 Q = require 'q'
 _ = require 'lodash'
 
-store = require './storage'
-logger = require './logger'
+storage = require './storage'
+logger = (require './logger').robot
 
 parseUserList = ($) ->
   (($ 'tr.tourists-item-tr').map (k, elem) -> {
@@ -36,7 +36,7 @@ robot = (task, doc) -> Q.fcall ->
       logger.info { id: doc.content.href, name: doc.content.fullname }, "=> #{task.target}"
 
       hotel = (task.target.match /hotel\/(\w+)/).pop()
-      store.updateUser hotel, doc.content
+      storage.updateUser hotel, doc.content
 
     when 'response-error'
       logger.warn { url: task.target }, "#{doc.content.statusCode}, retry #{task.retry}"
@@ -49,4 +49,4 @@ schedule = (put) -> (task) ->
     _.delay (-> put task), task.retry * 15*1000
 
 (require 'wbt/reactor')(robot, schedule).then ->
-  console.log 'DONE'
+  logger.info 'done'

@@ -16,6 +16,26 @@ storage = (db) -> {
       $date_in: userData.date_in
       $hotel: hotel
     }, resolve
+
+  listNotMailed: -> Q.Promise (resolve) ->
+    query = """
+      SELECT * FROM user_profile
+      WHERE notification IS NULL
+    """
+
+    db.all query, (err, data) ->
+      resolve data
+
+  markMailed: (href) -> Q.Promise (resolve) ->
+    query = """
+      UPDATE user_profile
+      SET notification = ?
+      WHERE href = ?
+    """
+
+    now = 0 | (0.001 * Date.now())
+    db.run query, [now, href], (err, data) ->
+      resolve()
 }
 
 db = new sqlite3.Database '_database.sqlite'
