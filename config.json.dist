@@ -1,4 +1,5 @@
 {
+	"hotels": ["al44182"],
 	"email": "",
 	"password": "",
 	"template": "message.hbs",

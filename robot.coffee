@@ -1,8 +1,8 @@
-HOTELS = ['al44182']
-
-
 Q = require 'q'
 _ = require 'lodash'
+
+nconf = (require 'nconf').file 'config.json'
+HOTELS = nconf.get 'hotels'
 
 storage = require './storage'
 logger = (require './logger').robot
