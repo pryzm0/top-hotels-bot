@@ -2,13 +2,10 @@ Q = require 'q'
 hbs = require 'handlebars'
 fs = require 'fs'
 
-request = require './request'
-storage = require './storage'
-logger = (require './logger').mailer
-
 nconf = (require 'nconf').file 'config.json'
 mailTemplate = hbs.compile (fs.readFileSync nconf.get('template')).toString()
 
+request = require './request'
 
 login = -> Q.Promise (resolve, reject) ->
   actionUrl = 'http://tophotels.ru/main/auth/login/'
@@ -39,21 +36,24 @@ mail = (userId, message, subj) -> Q.Promise (resolve, reject) ->
     if response.statusCode == 200 then resolve()
     else reject "Send message failed. Status #{response.statusCode}"
 
-login()
-  .then -> logger.info 'login ok'
-  .then -> storage.listNotMailed()
-  .then (users) ->
-    logger.info "#{users.length} messages to send"
+(require './storage').then (storage) ->
+  logger = (require './logger').mailer
 
-    subj = nconf.get('subject')
-    Q.allSettled users.map (user) ->
-      userId = user.href.split('/').pop()
-      message = mailTemplate user
-      mail(userId, message, subj)
-        .then ->
-          logger.info "message is sent to #{user.fullname} (#{userId})"
-          storage.markMailed user.href
-        .fail (err) ->
-          logger.error { message: err }, "failed to send message to #{user.fullname} (#{userId})"
-  .then -> logger.info 'job done. logout'
-  .fin -> logout()
+  login()
+    .then -> logger.info 'login ok'
+    .then -> storage.listNotMailed()
+    .then (users) ->
+      logger.info "#{users.length} messages to send"
+
+      subj = nconf.get('subject')
+      Q.allSettled users.map (user) ->
+        userId = user.href.split('/').pop()
+        message = mailTemplate user
+        mail(userId, message, subj)
+          .then ->
+            logger.info "message is sent to #{user.fullname} (#{userId})"
+            storage.markMailed user.href
+          .fail (err) ->
+            logger.error { message: err }, "failed to send message to #{user.fullname} (#{userId})"
+    .then -> logger.info 'job done. logout'
+    .fin -> logout()

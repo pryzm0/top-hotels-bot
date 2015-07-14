@@ -1,5 +1,6 @@
 
 module.exports = (require 'request').defaults {
+  gzip: true
   jar: true
   headers: {
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'

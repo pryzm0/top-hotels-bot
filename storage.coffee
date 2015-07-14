@@ -1,42 +1,46 @@
-sqlite3 = require 'sqlite3'
 Q = require 'q'
 
-storage = (db) -> {
+storage = (client) -> {
   updateUser: (hotel, userData) -> Q.Promise (resolve) ->
-    query = """
+    qs = """
       INSERT INTO user_profile(href, username, fullname, address, date_in, hotel_id)
-      VALUES ($href, $username, $fullname, $address, $date_in, $hotel)
+      VALUES ($1, $2, $3, $4, $5, $6)
     """
 
-    db.run query, {
-      $href: userData.href
-      $username: userData.username
-      $fullname: userData.fullname
-      $address: userData.address
-      $date_in: userData.date_in
-      $hotel: hotel
-    }, resolve
+    param = [
+      userData.href
+      userData.username
+      userData.fullname
+      userData.address
+      userData.date_in
+      hotel
+    ]
+
+    client.query qs, param, (err, result) ->
+      resolve()
 
   listNotMailed: -> Q.Promise (resolve) ->
-    query = """
+    qs = """
       SELECT * FROM user_profile
       WHERE notification IS NULL
     """
 
-    db.all query, (err, data) ->
-      resolve data
+    client.query qs, (err, result) ->
+      resolve result.rows
 
   markMailed: (href) -> Q.Promise (resolve) ->
-    query = """
+    qs = """
       UPDATE user_profile
-      SET notification = ?
-      WHERE href = ?
+      SET notification = NOW()
+      WHERE href = $1
     """
 
-    now = 0 | (0.001 * Date.now())
-    db.run query, [now, href], (err, data) ->
+    client.query qs, [href], (err, result) ->
       resolve()
 }
 
-db = new sqlite3.Database '_database.sqlite'
-module.exports = (storage db)
+
+module.exports = Q.Promise (resolve, reject) ->
+  (require 'pg').connect process.env.DATABASE_URL, (err, client) ->
+    unless err then resolve storage(client)
+    else reject err
