@@ -1,9 +1,6 @@
 Q = require 'q'
 _ = require 'lodash'
 
-nconf = (require 'nconf').file 'config.json'
-HOTELS = nconf.get 'hotels'
-
 parseUserList = ($) ->
   (($ 'tr.tourists-item-tr').map (k, elem) -> {
     entry: 'user-data'
@@ -18,35 +15,39 @@ parseUserList = ($) ->
 TaskDef = require './task'
 TaskUserList = TaskDef 'parse-user-list', [parseUserList]
 
-startUrl = (HOTELS.map (id) -> "http://tophotels.ru/main/hotel/#{id}/travellers/future")
-  .concat(HOTELS.map (id) -> "http://tophotels.ru/main/hotel/#{id}/travellers/now")
+module.exports = ->
+  nconf = (require 'nconf').file 'config.json'
+  HOTELS = nconf.get 'hotels'
 
-(require './storage').then (storage) ->
-  logger = (require './logger').robot
+  startUrl = (HOTELS.map (id) -> "http://tophotels.ru/main/hotel/#{id}/travellers/future")
+    .concat(HOTELS.map (id) -> "http://tophotels.ru/main/hotel/#{id}/travellers/now")
 
-  robot = (task, doc) -> Q.fcall ->
-    if task == 'initial'
-      return startUrl.map (url) -> TaskUserList url, 0
+  (require './storage').then (storage) ->
+    logger = (require './logger').robot
 
-    unless doc
-      return null
+    robot = (task, doc) -> Q.fcall ->
+      if task == 'initial'
+        return startUrl.map (url) -> TaskUserList url, 0
 
-    switch doc.entry
-      when 'user-data'
-        logger.info { id: doc.content.href, name: doc.content.fullname }, "=> #{task.target}"
+      unless doc
+        return null
 
-        hotel = (task.target.match /hotel\/(\w+)/).pop()
-        storage.updateUser hotel, doc.content
+      switch doc.entry
+        when 'user-data'
+          logger.info { id: doc.content.href, name: doc.content.fullname }, "=> #{task.target}"
 
-      when 'response-error'
-        logger.warn { url: task.target }, "#{doc.content.statusCode}, retry #{task.retry}"
-        return [TaskUserList task.target, (task.retry + 1)]
+          hotel = (task.target.match /hotel\/(\w+)/).pop()
+          storage.updateUser hotel, doc.content
 
-    return []
+        when 'response-error'
+          logger.warn { url: task.target }, "#{doc.content.statusCode}, retry #{task.retry}"
+          return [TaskUserList task.target, (task.retry + 1)]
 
-  schedule = (put) -> (task) ->
-    if task.retry < 10
-      _.delay (-> put task), task.retry * 15*1000
+      return []
 
-  (require 'wbt/reactor')(robot, schedule).then ->
-    logger.info 'done'
+    schedule = (put) -> (task) ->
+      if task.retry < 10
+        _.delay (-> put task), task.retry * 15*1000
+
+    (require 'wbt/reactor')(robot, schedule).then ->
+      logger.info 'done'

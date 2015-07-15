@@ -6,8 +6,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "body-parser": "^1.13.2",
     "bunyan": "^1.4.0",
     "coffee-script": "^1.9.3",
+    "express": "^4.13.1",
     "handlebars": "^3.0.3",
     "iconv-lite": "^0.4.11",
     "lodash": "^3.10.0",
