@@ -1,6 +1,6 @@
 fs = require 'fs'
 
-filename = "#{__dirname}/../_mailer.log"
+filename = "#{process.cwd()}/_mailer.log"
 mailer = require '../mailer'
 
 module.exports = (app) ->

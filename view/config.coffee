@@ -2,9 +2,9 @@ fs = require 'fs'
 
 module.exports = (app) ->
   app.get (req, res) ->
-    res.sendFile 'config.json', root: "#{__dirname}/../"
+    res.sendFile 'config.json', root: process.cwd()
 
   app.post (req, res) ->
     config = JSON.stringify req.body
-    fs.writeFile "#{__dirname}/../config.json", config, ->
+    fs.writeFile "#{process.cwd()}/config.json", config, ->
       res.sendStatus 200

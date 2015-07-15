@@ -1,6 +1,6 @@
 fs = require 'fs'
 
-filename = "#{__dirname}/../_robot.log"
+filename = "#{process.cwd()}/_robot.log"
 robot = require '../robot'
 
 module.exports = (app) ->
