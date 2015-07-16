@@ -16,8 +16,6 @@ TaskDef = require './task'
 TaskUserList = TaskDef 'parse-user-list', [parseUserList]
 
 module.exports = ->
-  console.log 'RUN'
-
   nconf = (require 'nconf').file 'config.json'
   HOTELS = nconf.get 'hotels'
 
