@@ -6,7 +6,7 @@ module.exports =
     serializers:
       res: bunyan.stdSerializers.res
     streams: [
-      # { level: 'trace', stream: process.stdout },
+      { level: 'trace', stream: process.stdout },
       { level: 'info', path: '_robot.log' },
     ]
   }
@@ -15,7 +15,7 @@ module.exports =
     serializers:
       res: bunyan.stdSerializers.res
     streams: [
-      # { level: 'trace', stream: process.stdout },
+      { level: 'trace', stream: process.stdout },
       { level: 'info', path: '_mailer.log' },
     ]
   }

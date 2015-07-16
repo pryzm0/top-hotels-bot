@@ -16,13 +16,15 @@ TaskDef = require './task'
 TaskUserList = TaskDef 'parse-user-list', [parseUserList]
 
 module.exports = ->
+  console.log 'RUN'
+
   nconf = (require 'nconf').file 'config.json'
   HOTELS = nconf.get 'hotels'
 
   startUrl = (HOTELS.map (id) -> "http://tophotels.ru/main/hotel/#{id}/travellers/future")
     .concat(HOTELS.map (id) -> "http://tophotels.ru/main/hotel/#{id}/travellers/now")
 
-  (require './storage').then (storage) ->
+  (require './storage_sqlite3').then (storage) ->
     logger = (require './logger').robot
 
     robot = (task, doc) -> Q.fcall ->
