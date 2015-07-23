@@ -1,5 +1,15 @@
-USERNAME = 'admin'
-PASSWORD = 'finnjake'
+nconf = (require 'nconf').argv().defaults {
+  username: 'admin'
+  password: 'finnjake'
+  host: '127.0.0.1'
+  port: 8080
+  static:
+    serve: true
+    dir: {
+      '/static': './bower_components'
+      '/': './www'
+    }
+}
 
 http = require 'http'
 express = require 'express'
@@ -8,25 +18,27 @@ bodyParser = require 'body-parser'
 
 app = express()
 
-app.use (req, res, next) ->
-  unauthorized = ->
-    res.set 'WWW-Authenticate', 'Basic realm=Authorization required'
-    res.sendStatus 401
+if nconf.get 'username'
+  app.use (req, res, next) ->
+    unauthorized = ->
+      res.set 'WWW-Authenticate', 'Basic realm=Authorization required'
+      res.sendStatus 401
 
-  user = basicAuth req
+    user = basicAuth req
 
-  unless user and user.name and user.pass
-    return unauthorized()
+    unless user and user.name and user.pass
+      return unauthorized()
 
-  unless user.name == USERNAME and user.pass == PASSWORD
-    return unauthorized()
+    unless user.name == (nconf.get 'username') and user.pass == (nconf.get 'password')
+      return unauthorized()
 
-  next()
+    next()
 
 app.use bodyParser.json()
 
-app.use '/static', (express.static './bower_components')
-app.use '/', (express.static './www')
+if nconf.get 'static:serve'
+  for own path, dir of nconf.get 'static:dir'
+    app.use path, (express.static dir)
 
 (require './view/config')(app.route '/api/config')
 (require './view/robot')(app.route '/api/robot')
@@ -34,7 +46,7 @@ app.use '/', (express.static './www')
 
 server = http.createServer app
 
-server.listen (port = process.env.PORT ? 8080), ->
+server.listen (nconf.get 'port'), (nconf.get 'host'), ->
   console.log 'Listening on', port
 
 
