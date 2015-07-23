@@ -47,8 +47,7 @@ if nconf.get 'static:serve'
 server = http.createServer app
 
 server.listen (nconf.get 'port'), (nconf.get 'host'), ->
-  console.log 'Listening on', port
-
+  console.log 'Listening on', "#{nconf.get 'host'}:#{nconf.get 'port'}"
 
 # # Run robot every 12 minutes.
 # setInterval (require './robot'), 12*60*1000
