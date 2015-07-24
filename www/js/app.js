@@ -18,114 +18,73 @@
       $scope.addHotel = function () {
         var m = $scope.hotelInput.match(/\/main\/hotel\/(\w+)/);
         var id = m ? m[1] : $scope.hotelInput;
-        if ($scope.config.hotels.indexOf(id) === -1) {
-          $scope.config.hotels.push(m ? m[1] : $scope.hotelInput);
+        var list = $scope.config.robot.target.hotels;
+        if (list.indexOf(id) === -1) {
+          list.push(m ? m[1] : $scope.hotelInput);
         }
         else {
-          alert('already exists');
+          alert('already added');
         }
       };
 
       $scope.removeHotel = function (index) {
-        $scope.config.hotels.splice(index, 1);
+        $scope.config.robot.target.hotels.splice(index, 1);
       };
     })
     .controller('RobotController', function ($scope, Api) {
-      $scope.log = [];
-
-      readLog();
+      $scope.logtail = '';
 
       $scope.run = function () {
         $('body').css('cursor', 'wait');
-        Api.runRobot().then(function () {
-          return readLog();
+        Api.runRobot().then(function (stdout) {
+          $scope.logtail = stdout;
         }).finally(function () {
           $('body').css('cursor', '');
         });
       };
-
-      function readLog() {
-        Api.getRobotLog().then(function (data) {
-          $scope.log = data;
-        });
-      }
     })
     .controller('MailerController', function ($scope, Api) {
-      $scope.log = [];
-
-      readLog();
+      $scope.logtail = '';
 
       $scope.run = function () {
         $('body').css('cursor', 'wait');
-        Api.runMailer().then(function () {
-          return readLog();
+        Api.runMailer().then(function (stdout) {
+          $scope.logtail = stdout;
         }).finally(function () {
           $('body').css('cursor', '');
         });
       };
-
-      function readLog() {
-        Api.getMailerLog().then(function (data) {
-          $scope.log = data;
-        });
-      }
     })
     .service('Api', function ($http) {
       return {
         getConfig: function () {
-          return $http.get('/api/config').then(function (response) {
-            return response.data;
-          });
+          return $http.get('/api/config').then(responseData);
         },
 
         setConfig: function (data) {
-          return $http.post('/api/config', data).then(function (response) {
-            return true;
-          });
+          return $http.post('/api/config', data).then(responseData);
         },
 
         getRobotLog: function () {
-          return $http.get('/api/robot').then(function (response) {
-            return response.data;
-          });
+          return $http.get('/api/robot').then(responseData);
         },
 
         runRobot: function () {
-          return $http.post('/api/robot', {}).then(function () {
-            return true;
-          });
+          return $http.post('/api/robot', {}).then(responseData);
         },
 
         getMailerLog: function () {
-          return $http.get('/api/mailer').then(function (response) {
-            return response.data;
-          });
+          return $http.get('/api/mailer').then(responseData);
         },
 
         runMailer: function () {
-          return $http.post('/api/mailer', {}).then(function (response) {
-            return true;
-          });
+          return $http.post('/api/mailer', {}).then(responseData);
         },
       };
-    })
-    .filter('bunyan', function () {
-      return function (obj) {
-        var lines = [];
-        for (var key in obj) {
-          if (!obj.hasOwnProperty(key)) {
-            continue;
-          }
-          if (key.charAt(0) === '$') {
-            continue;
-          }
-          if (key === 'hostname' || key === 'pid' || key === 'v' || key === 'level') {
-            continue;
-          }
-          lines.push('' + key + ': ' + obj[key]);
-        }
-        return lines.join('\n');
-      };
+
+      function responseData(response) {
+        return response.data;
+      }
     })
     .config(function ($routeProvider, $locationProvider) {
       $routeProvider

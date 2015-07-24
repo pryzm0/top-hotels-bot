@@ -1,5 +1,9 @@
 <div class="text-right" style="margin-bottom: 1em;">
+    <a href="/api/mailer" target="_blank">
+        <button class="btn btn-default">Recent log</button>
+    </a>
+    &nbsp;
     <button class="btn btn-primary" ng-click="run()">Run</button>
 </div>
 
-<pre ng-repeat="line in log">{{ line|bunyan }}</pre>
+<pre ng-if="logtail">{{ logtail }}</pre>

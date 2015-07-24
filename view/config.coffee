@@ -1,10 +1,11 @@
+CONFIG = 'config-local.json'
+
 fs = require 'fs'
 
 module.exports = (app) ->
   app.get (req, res) ->
-    res.sendFile 'config.json', root: process.cwd()
+    res.sendFile CONFIG, root: process.cwd()
 
   app.post (req, res) ->
-    config = JSON.stringify req.body
-    fs.writeFile "#{process.cwd()}/config.json", config, ->
+    fs.writeFile CONFIG, (JSON.stringify req.body, null, '  '), ->
       res.sendStatus 200

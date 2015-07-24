@@ -1,6 +1,9 @@
 Q = require 'q'
 _ = require 'lodash'
 
+nconf = require '../config-app'
+logger = require './logger'
+
 parseUserList = ($) ->
   (($ 'tr.tourists-item-tr').map (k, elem) -> {
     entry: 'user-data'
@@ -16,25 +19,28 @@ TaskDef = require './task'
 TaskUserList = TaskDef 'parse-user-list', [parseUserList]
 
 module.exports = ->
-  nconf = (require 'nconf').file 'config.json'
-  HOTELS = nconf.get 'hotels'
+  logger.debug { config: nconf.get 'robot' }, 'start'
 
-  startUrl = (HOTELS.map (id) -> "http://tophotels.ru/main/hotel/#{id}/travellers/future")
-    .concat(HOTELS.map (id) -> "http://tophotels.ru/main/hotel/#{id}/travellers/now")
+  hotels = nconf.get 'robot:target:hotels'
+  startUrl = (hotels.map (id) -> "http://tophotels.ru/main/hotel/#{id}/travellers/future")
+    .concat(hotels.map (id) -> "http://tophotels.ru/main/hotel/#{id}/travellers/now")
 
-  (require './storage_sqlite3').then (storage) ->
-    logger = (require './logger').robot
-
+  (require '../storage_sqlite3').then (storage) ->
     robot = (task, doc) -> Q.fcall ->
       if task == 'initial'
+        logger.debug 'initial task: crawl', startUrl.length, 'pages'
         return startUrl.map (url) -> TaskUserList url, 0
 
       unless doc
+        logger.debug 'no doc received'
         return null
 
       switch doc.entry
         when 'user-data'
-          logger.info { id: doc.content.href, name: doc.content.fullname }, "=> #{task.target}"
+          logger.info {
+            href: doc.content.href
+            fullname: doc.content.fullname
+          }, "=> #{task.target}"
 
           hotel = (task.target.match /hotel\/(\w+)/).pop()
           storage.updateUser hotel, doc.content
@@ -49,5 +55,7 @@ module.exports = ->
       if task.retry < 10
         _.delay (-> put task), task.retry * 15*1000
 
+    logger.debug 'run reactor'
+
     (require 'wbt/reactor')(robot, schedule).then ->
-      logger.info 'done'
+      logger.info 'finish'

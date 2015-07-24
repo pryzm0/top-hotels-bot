@@ -1,18 +1,35 @@
-fs = require 'fs'
+{ fork, spawn } = require 'child_process'
 
-filename = "#{process.cwd()}/_robot.log"
-robot = require '../robot'
+nconf = require '../config-app'
+logger = require './logger'
 
 module.exports = (app) ->
   app.get (req, res) ->
-    fs.readFile filename, { encoding: 'utf8' }, (err, content) ->
-      log = (content.split '\n').reverse()
-      log.shift() until log[0]
+    logger.debug 'spawn log tail process'
 
-      res.type 'application/json'
-      res.send "[#{log.slice(0, 200).join ','}]"
+    proc = spawn('sh', ['tail', nconf.get 'robot:log'])
+      .on 'error', (error) ->
+        logger.error { error }, 'tail process failed'
+      .on 'exit', (code) ->
+        logger.debug { code }, 'tail process exit'
+
+    res.type 'text/plain'
+
+    proc.stdout.pipe(res)
+    proc.stdout.pipe(process.stdout)
+    proc.stderr.pipe(process.stderr)
 
   app.post (req, res) ->
-    robot()
-      .then -> res.sendStatus 200
-      .fail -> res.sendStatus 404
+    logger.debug 'spawn robot process'
+
+    proc = spawn('node', ['--harmony', 'robot/index.js', '--bformat:color='])
+      .on 'error', (error) ->
+        logger.error { error }, 'robot process failed'
+      .on 'exit', (code) ->
+        logger.debug { code }, 'robot process exit'
+
+    res.type 'text/plain'
+
+    proc.stdout.pipe(res)
+    proc.stdout.pipe(process.stdout)
+    proc.stderr.pipe(process.stderr)

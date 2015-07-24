@@ -38,7 +38,7 @@ storage = (db) -> {
       resolve()
 }
 
+nconf = require './config-app'
 
-module.exports = Q.Promise (resolve, reject) ->
-  db = new sqlite3.Database '_database.sqlite'
-  resolve storage(db)
+module.exports = Q.Promise (resolve) ->
+  resolve(storage new sqlite3.Database(nconf.get 'storage:sqlite3'))
