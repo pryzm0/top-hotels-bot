@@ -28,11 +28,11 @@ module.exports = ->
   (require '../storage_sqlite3').then (storage) ->
     robot = (task, doc) -> Q.fcall ->
       if task == 'initial'
-        logger.debug 'initial task: crawl', startUrl.length, 'pages'
+        logger.info 'initial task: crawl', startUrl.length, 'pages'
         return startUrl.map (url) -> TaskUserList url, 0
 
       unless doc
-        logger.debug 'no doc received'
+        logger.warn 'no doc received'
         return null
 
       switch doc.entry

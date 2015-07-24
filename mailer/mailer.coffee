@@ -83,7 +83,9 @@ module.exports = ->
         logger.info "#{users.length} messages in queue"
 
         Q.allSettled users.map (user) ->
-          mailUser(user).then -> storage.markMailed user.href
+          mailUser(user).then ->
+            unless nconf.get 'mailer:simulate'
+              storage.markMailed user.href
 
       .then -> logger.info 'complete'
       .then -> mailer.logout()

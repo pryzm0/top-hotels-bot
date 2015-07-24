@@ -99,7 +99,8 @@
         .when('/mailer', {
           templateUrl: 'mailer.html',
           controller: 'MailerController',
-        });
+        })
+        .otherwise('/config');
 
       // $locationProvider.html5Mode(true);
     });
