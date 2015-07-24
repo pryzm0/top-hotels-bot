@@ -18,7 +18,7 @@ module.exports = (require 'nconf')
       sqlite3: '_database.sqlite'
     bformat:
       outputMode: 'short'
-      color: true
+      color: false
     robot:
       request: { gzip: true, jar: true, headers: defaultHeaders }
       log: '_robot.log'

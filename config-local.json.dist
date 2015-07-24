@@ -1,0 +1,21 @@
+{
+  "robot": {
+    "target": {
+      "hotels": [
+        "al44182",
+        "al44184"
+      ]
+    }
+  },
+  "mailer": {
+    "content": {
+      "theme": "Curious theme",
+      "template": "Adjustable template, {{ user.fullname }}.\nHALLLOO!!"
+    },
+    "auth": {
+      "email": "admin@phuket.th",
+      "password": "thailand"
+    },
+    "simulate": true
+  }
+}
