@@ -1,3 +1,4 @@
+_ = require 'lodash'
 Q = require 'q'
 hbs = require 'handlebars'
 
@@ -6,6 +7,19 @@ logger = require './logger'
 
 request = ((require 'request').defaults(
   (require '../config-app').get('mailer:request')))
+
+matchDateIn = (value) ->
+  dates = []
+  regex = /(\d\d)\.(\d\d)\.(\d\d\d\d)/g
+  while m = (regex.exec value)
+    [str, dd. mm, yyyy] = m.map parseInt
+    dates.push (new Date yyyy, mm-1, dd)
+  logger.debug 'match date in', value, dates
+  unless dates.length == 2
+    return false
+  days = Math.floor (dates[0].getTime() - Date.now()) / (24*60*60*1000)
+  logger.debug 'days', days
+  return days < 14
 
 MailerSafe =
   login: (auth) ->
@@ -80,6 +94,9 @@ module.exports = ->
       .then -> logger.debug '=> ok'
       .then -> storage.listNotMailed()
       .then (users) ->
+        users = _.filter users, (user) ->
+          matchDateIn user.date_in
+
         logger.info "#{users.length} messages in queue"
 
         Q.allSettled users.map (user) ->
