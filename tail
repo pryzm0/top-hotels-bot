@@ -1,2 +1,2 @@
 #!/bin/sh
-tail -100 $1 | bunyan --no-color -o short
+tail -100 $1 | ./bunyan --no-color -o short

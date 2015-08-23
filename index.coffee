@@ -18,8 +18,8 @@ if nconf.get 'password'
     unless user and user.name and user.pass
       return unauthorized()
 
-    unless (user.name == (nconf.get 'username')
-        and user.pass == (nconf.get 'password'))
+    unless (user.name == (nconf.get 'username') and
+            user.pass == (nconf.get 'password'))
       return unauthorized()
 
     next()
