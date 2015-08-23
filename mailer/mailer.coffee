@@ -12,7 +12,7 @@ matchDateIn = (value) ->
   dates = []
   regex = /(\d\d)\.(\d\d)\.(\d\d\d\d)/g
   while m = (regex.exec value)
-    [str, dd. mm, yyyy] = m.map parseInt
+    [str, dd, mm, yyyy] = _.map m, parseInt
     dates.push (new Date yyyy, mm-1, dd)
   logger.debug 'match date in', value, dates
   unless dates.length == 2
@@ -43,18 +43,16 @@ Mailer =
       pass: password
       back: 'http://tophotels.ru'
     }
-    request.on 'error', (err) -> reject err
-      .post actionUrl, { form: formData }, (err, response) ->
-        if not err and response.statusCode == 302 then resolve()
-        else reject(err or response.statusCode)
+    request.post actionUrl, { form: formData }, (err, response) ->
+      unless err and then resolve()
+      else reject(err or "status: #{response.statusCode}")
 
   logout: -> Q.Promise (resolve) ->
     logger.debug '<= logout'
     actionUrl = 'http://tophotels.ru/main/auth/logout/'
-    request.on 'error', (err) -> reject err
-      .get actionUrl, (err, response) ->
-        if not err then resolve()
-        else reject(err)
+    request.get actionUrl, (err, response) ->
+      unless err then resolve()
+      else reject(err)
 
   send: (href, message, theme) -> Q.Promise (resolve, reject) ->
     logger.debug 'send to', href
