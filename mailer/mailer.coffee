@@ -42,7 +42,7 @@ Mailer =
       back: 'http://tophotels.ru'
     }
     request.post actionUrl, { form: formData }, (err, response) ->
-      unless err and then resolve()
+      unless err then resolve()
       else reject(err or "status: #{response.statusCode}")
 
   logout: -> Q.Promise (resolve) ->
