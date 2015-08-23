@@ -25,6 +25,7 @@
     "request": "^2.58.0",
     "sqlite3": "^3.0.9",
     "tough-cookie": "^2.0.0",
-    "wbt": "pryzm0/wbt"
+    "wbt": "pryzm0/wbt",
+    "moment": "~2.10.6"
   }
 }

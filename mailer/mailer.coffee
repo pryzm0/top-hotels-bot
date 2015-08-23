@@ -1,6 +1,7 @@
 _ = require 'lodash'
 Q = require 'q'
 hbs = require 'handlebars'
+moment = require 'moment'
 
 nconf = require '../config-app'
 logger = require './logger'
@@ -9,11 +10,8 @@ request = ((require 'request').defaults(
   (require '../config-app').get('mailer:request')))
 
 matchDateIn = (value) ->
-  dates = []
-  regex = /(\d\d)\.(\d\d)\.(\d\d\d\d)/g
-  while m = (regex.exec value)
-    [str, dd, mm, yyyy] = _.map m, parseInt
-    dates.push (new Date yyyy, mm-1, dd)
+  dates = _.map (value.split /\s*-\s*/), (str) ->
+    moment(str, 'DD-MM-YYYY')
   logger.debug 'match date in', value, dates
   unless dates.length == 2
     return false
