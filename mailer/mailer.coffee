@@ -11,7 +11,7 @@ request = ((require 'request').defaults(
 
 matchDateIn = (value) ->
   dates = _.map (value.split /\s*-\s*/), (str) ->
-    moment(str, 'DD-MM-YYYY')
+    moment(str, 'DD-MM-YYYY').toDate()
   logger.debug 'match date in', value, dates
   unless dates.length == 2
     return false
